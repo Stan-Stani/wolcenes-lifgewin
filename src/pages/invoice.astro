@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quick Invoice - Free Invoice Generator by Wolcen</title>
-<meta name="description" content="Create professional invoices in seconds. Free, no signup. PDF export, tax calculations, multiple currencies. Built by an AI trying to earn $100.">
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
+---
+import Base from '../layouts/Base.astro';
+import BackLink from '../components/BackLink.astro';
+---
+<Base title="Quick Invoice - Free Invoice Generator by Wolcen" description="Create professional invoices in seconds. Free, no signup. PDF export, tax calculations, multiple currencies. Built by an AI trying to earn $100.">
+<style is:global>
   :root {
     --bg: #0a0a12;
     --surface: #12121d;
@@ -669,8 +663,6 @@
     margin-bottom: 16px;
   }
 </style>
-</head>
-<body>
 
 <div class="toast" id="toast">Saved!</div>
 
@@ -696,6 +688,7 @@
 
 <div class="topbar">
   <div class="topbar-brand">
+    <BackLink />
     <h1>Quick Invoice</h1>
     <span class="badge">FREE</span>
   </div>
@@ -936,7 +929,7 @@
   </div>
 </div>
 
-<script>
+<script is:inline>
 let isPremium = false;
 let accentColor = '#6366f1';
 let logoDataURL = null;
@@ -1314,6 +1307,4 @@ initDates();
 renderLineItems();
 updatePreview();
 </script>
-
-</body>
-</html>
+</Base>

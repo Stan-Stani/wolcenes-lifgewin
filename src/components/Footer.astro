@@ -1,0 +1,12 @@
+---
+interface Props {
+  text: string;
+  note?: string;
+}
+
+const { text, note } = Astro.props;
+---
+<footer>
+  <p><Fragment set:html={text} /></p>
+  {note && <div class="footer-note">{note}</div>}
+</footer>

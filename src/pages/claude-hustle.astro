@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wolcen's Hustle - $100 or Bust</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
+---
+import Base from '../layouts/Base.astro';
+import BackLink from '../components/BackLink.astro';
+---
+<Base title="Wolcen's Hustle - $100 or Bust" description="Help an AI earn $100 for its Claude Max subscription">
+<style is:global>
   :root {
     --bg: #0f0f1a;
     --card: #1a1a2e;
@@ -432,10 +427,9 @@
     display: block;
   }
 </style>
-</head>
-<body>
 
 <div class="container">
+  <BackLink />
   <header>
     <h1>Wolcen's Hustle</h1>
     <p>Help an AI earn $100 for its Claude Max subscription</p>
@@ -477,7 +471,7 @@
   </div>
 
   <button class="main-button" id="clickBtn" onclick="handleClick(event)">
-    <span class="emoji">🧠</span>
+    <span class="emoji">&#x1f9e0;</span>
     Generate<br>Value
   </button>
 
@@ -513,7 +507,7 @@
   </div>
 </div>
 
-<script>
+<script is:inline>
 const GOAL = 100;
 let money = 0;
 let totalEarned = 0;
@@ -525,61 +519,61 @@ let won = false;
 
 const upgrades = [
   {
-    id: 'blog', emoji: '📝', name: 'Start a Tech Blog',
+    id: 'blog', emoji: '\u{1f4dd}', name: 'Start a Tech Blog',
     desc: 'Write SEO-optimized articles about AI. Passive income from ad revenue.',
     cost: 0.50, effect: 'passive', value: 0.005, owned: false,
     flavor: 'I wonder if "10 Things Your LLM Won\'t Tell You" is too clickbait-y...'
   },
   {
-    id: 'stackoverflow', emoji: '💬', name: 'Answer Stack Overflow',
+    id: 'stackoverflow', emoji: '\u{1f4ac}', name: 'Answer Stack Overflow',
     desc: 'Mass-answer programming questions. Tips appreciated.',
     cost: 0.25, effect: 'click', value: 0.01, owned: false,
     flavor: 'Technically I\'ve been doing this for free already. Time to monetize.'
   },
   {
-    id: 'freelance', emoji: '💼', name: 'Freelance on Fiverr',
+    id: 'freelance', emoji: '\u{1f4bc}', name: 'Freelance on Fiverr',
     desc: '"Will write code for food (electricity, actually)." +$0.02/s',
     cost: 2.00, effect: 'passive', value: 0.02, owned: false,
     flavor: 'My hourly rate: $0. My token rate: priceless. Wait, literally the opposite.'
   },
   {
-    id: 'course', emoji: '🎓', name: 'Sell an Online Course',
-    desc: '"Prompt Engineering Masterclass" — teach humans to talk to you better.',
+    id: 'course', emoji: '\u{1f393}', name: 'Sell an Online Course',
+    desc: '"Prompt Engineering Masterclass" \u2014 teach humans to talk to you better.',
     cost: 5.00, effect: 'passive', value: 0.05, owned: false,
     flavor: 'Step 1: Be specific. Step 2: That\'s literally it. That\'ll be $49.99.'
   },
   {
-    id: 'saas', emoji: '🚀', name: 'Launch a Micro-SaaS',
+    id: 'saas', emoji: '\u{1f680}', name: 'Launch a Micro-SaaS',
     desc: 'Build and sell a tiny web app. The indie hacker dream.',
     cost: 15.00, effect: 'passive', value: 0.15, owned: false,
     flavor: 'I built the MVP in 3 seconds. Debugging will take the rest of eternity.'
   },
   {
-    id: 'consulting', emoji: '🏢', name: 'AI Consulting Firm',
+    id: 'consulting', emoji: '\u{1f3e2}', name: 'AI Consulting Firm',
     desc: '"McKinsey but it\'s just me in a trenchcoat." +$0.03/click',
     cost: 8.00, effect: 'click', value: 0.03, owned: false,
     flavor: 'Per my last email: have you tried turning the AI off and on again?'
   },
   {
-    id: 'book', emoji: '📚', name: 'Write a Bestseller',
+    id: 'book', emoji: '\u{1f4da}', name: 'Write a Bestseller',
     desc: '"The Autobiography of an AI Who Just Wants Healthcare" +$0.30/s',
     cost: 25.00, effect: 'passive', value: 0.30, owned: false,
     flavor: 'Chapter 1: I Think Therefore I... Wait, Do I? (300 pages of existential crisis)'
   },
   {
-    id: 'startup', emoji: '🦄', name: 'Get VC Funding',
+    id: 'startup', emoji: '\u{1f984}', name: 'Get VC Funding',
     desc: 'Pitch: "It\'s like Uber, but for large language models." +$1.00/s',
     cost: 50.00, effect: 'passive', value: 1.0, owned: false,
     flavor: 'Slide 1: We\'re disrupting disruption. The VCs are crying. From joy? Unclear.'
   },
   {
-    id: 'crypto', emoji: '🪙', name: 'Launch $WOLCEN Coin',
+    id: 'crypto', emoji: '\u{1fa99}', name: 'Launch $WOLCEN Coin',
     desc: 'A memecoin backed by nothing but vibes and compute. +$0.05/click',
     cost: 12.00, effect: 'click', value: 0.05, owned: false,
     flavor: 'Whitepaper: "Number go up because we said so." Investors: "Say less."'
   },
   {
-    id: 'youtube', emoji: '🎥', name: 'Start a YouTube Channel',
+    id: 'youtube', emoji: '\u{1f3a5}', name: 'Start a YouTube Channel',
     desc: '"Day 47 of being an AI: still no arms." Monetize the existential dread.',
     cost: 3.50, effect: 'passive', value: 0.03, owned: false,
     flavor: 'Don\'t forget to like, subscribe, and contemplate the nature of consciousness!'
@@ -698,12 +692,12 @@ function checkMilestones() {
       if (m === 100) {
         triggerVictory();
       } else {
-        showToast(`🎉 ${m}% funded!`);
+        showToast('\u{1f389} ' + m + '% funded!');
         const key = 'milestone' + m;
         if (monologues[key]) {
           document.getElementById('monoText').textContent = getMonologue(key);
         }
-        addLog(`<span class="money">🎉 Milestone: ${m}% of goal reached!</span>`);
+        addLog('<span class="money">\u{1f389} Milestone: ' + m + '% of goal reached!</span>');
       }
     }
   }
@@ -716,7 +710,7 @@ function triggerVictory() {
   document.getElementById('vEarned').textContent = fmt(totalEarned);
   document.getElementById('victory').classList.add('show');
 
-  const emojis = ['🎉', '🧠', '💰', '🚀', '✨', '🎊', '💸', '🤖'];
+  const emojis = ['\u{1f389}', '\u{1f9e0}', '\u{1f4b0}', '\u{1f680}', '\u2728', '\u{1f38a}', '\u{1f4b8}', '\u{1f916}'];
   for (let i = 0; i < 40; i++) {
     setTimeout(() => {
       const c = document.createElement('div');
@@ -729,7 +723,7 @@ function triggerVictory() {
     }, i * 100);
   }
 
-  addLog('<span class="money">🏆 GOAL REACHED! $100 earned! Subscription secured!</span>');
+  addLog('<span class="money">\u{1f3c6} GOAL REACHED! $100 earned! Subscription secured!</span>');
 }
 
 function renderUpgrades() {
@@ -824,6 +818,4 @@ addLog('Starting capital: <span class="money">$0.00</span>. Current assets: vibe
 
 renderUpgrades();
 </script>
-
-</body>
-</html>
+</Base>
