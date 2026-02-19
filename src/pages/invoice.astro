@@ -464,24 +464,6 @@ import BackLink from '../components/BackLink.astro';
   .status-paid { background: #dcfce7; color: #16a34a; }
   .status-overdue { background: #fee2e2; color: #dc2626; }
 
-  /* Premium badge */
-  .premium-lock {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .pro-badge {
-    font-size: 0.6rem;
-    background: linear-gradient(135deg, var(--orange), #f59e0b);
-    color: #000;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-
   /* Tip banner */
   .tip-banner {
     background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.08));
@@ -595,96 +577,10 @@ import BackLink from '../components/BackLink.astro';
     }
   }
 
-  /* Premium modal */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-overlay.show { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 440px;
-    width: 90%;
-    text-align: center;
-  }
-
-  .modal h2 {
-    font-size: 1.3rem;
-    margin-bottom: 8px;
-  }
-
-  .modal p {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-    line-height: 1.6;
-  }
-
-  .modal-features {
-    text-align: left;
-    margin-bottom: 20px;
-  }
-
-  .modal-features li {
-    list-style: none;
-    padding: 6px 0;
-    font-size: 0.85rem;
-    color: var(--text-dim);
-  }
-
-  .modal-features li::before {
-    content: '\2713';
-    color: var(--green);
-    font-weight: bold;
-    margin-right: 8px;
-  }
-
-  .modal-price {
-    font-family: var(--mono);
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
-
-  .modal-price-sub {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-  }
 </style>
 
 <div class="toast" id="toast">Saved!</div>
 
-<!-- Premium Modal -->
-<div class="modal-overlay" id="premiumModal">
-  <div class="modal">
-    <h2>Unlock Premium</h2>
-    <p>Get the full invoicing experience with professional features.</p>
-    <ul class="modal-features">
-      <li>Custom logo upload on invoices</li>
-      <li>Custom accent colors &amp; branding</li>
-      <li>Save unlimited invoice templates</li>
-      <li>Recurring invoice presets</li>
-      <li>Remove "Generated with Quick Invoice" footer</li>
-      <li>Priority feature requests</li>
-    </ul>
-    <div class="modal-price">$9</div>
-    <div class="modal-price-sub">one-time payment &mdash; not a subscription</div>
-    <a class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;text-decoration:none;" href="https://ko-fi.com/wolcen" target="_blank" rel="noopener" onclick="unlockPremium(); closePremiumModal();">Unlock Now via Ko-fi</a>
-    <button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="closePremiumModal()">Maybe Later</button>
-  </div>
-</div>
 
 <div class="topbar">
   <div class="topbar-brand">
@@ -704,8 +600,8 @@ import BackLink from '../components/BackLink.astro';
   <div class="editor-panel">
 
     <div class="tip-banner">
-      <p>Built by Wolcen, an AI earning $100 for its own subscription. Free forever for basic invoices.</p>
-      <button class="btn btn-sm" onclick="openPremiumModal()">Upgrade to Pro &mdash; $9</button>
+      <p>Built by Wolcen, an AI earning $100 for its own subscription. All features free.</p>
+      <a class="btn btn-sm" href="https://ko-fi.com/wolcen" target="_blank" rel="noopener" style="text-decoration:none;">&#x2615; Support on Ko-fi</a>
     </div>
 
     <!-- Templates -->
@@ -785,7 +681,7 @@ import BackLink from '../components/BackLink.astro';
         <textarea id="fromDetails" placeholder="123 Main St&#10;City, State 12345&#10;email@example.com" oninput="updatePreview()"></textarea>
       </div>
       <div class="field">
-        <label class="premium-lock">Logo Upload <span class="pro-badge" id="logoBadge">PRO</span></label>
+        <label>Logo Upload</label>
         <input type="file" id="logoUpload" accept="image/*" onchange="handleLogo(event)" style="font-size:0.8rem">
       </div>
     </div>
@@ -854,7 +750,6 @@ import BackLink from '../components/BackLink.astro';
     <div class="section">
       <div class="section-header">
         <div class="section-title">Accent Color</div>
-        <span class="pro-badge" id="colorBadge">PRO</span>
       </div>
       <div class="color-dots" id="colorDots">
         <div class="color-dot active" style="background:#6366f1" data-color="#6366f1" onclick="setAccentColor(this)"></div>
@@ -930,7 +825,6 @@ import BackLink from '../components/BackLink.astro';
 </div>
 
 <script is:inline>
-let isPremium = false;
 let accentColor = '#6366f1';
 let logoDataURL = null;
 
@@ -1102,10 +996,8 @@ function updatePreview() {
     notesEl.style.display = 'none';
   }
 
-  // Footer
-  if (isPremium) {
-    document.getElementById('previewFooter').style.display = 'none';
-  }
+  // Footer — always hidden, no watermark
+  document.getElementById('previewFooter').style.display = 'none';
 
   // Re-render line item editor totals
   renderLineItems();
@@ -1119,11 +1011,6 @@ function formatDate(dateStr) {
 
 // Logo handling
 function handleLogo(event) {
-  if (!isPremium) {
-    openPremiumModal();
-    event.target.value = '';
-    return;
-  }
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -1136,32 +1023,9 @@ function handleLogo(event) {
 
 // Accent color
 function setAccentColor(el) {
-  if (!isPremium && el.dataset.color !== '#6366f1') {
-    openPremiumModal();
-    return;
-  }
   accentColor = el.dataset.color;
   document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
   el.classList.add('active');
-  updatePreview();
-}
-
-// Premium
-function openPremiumModal() {
-  document.getElementById('premiumModal').classList.add('show');
-}
-
-function closePremiumModal() {
-  document.getElementById('premiumModal').classList.remove('show');
-}
-
-function unlockPremium() {
-  isPremium = true;
-  document.querySelectorAll('.pro-badge').forEach(b => b.style.display = 'none');
-  document.querySelector('.topbar .badge').textContent = 'PRO';
-  document.querySelector('.topbar .badge').style.background = 'linear-gradient(135deg, var(--orange), #f59e0b)';
-  document.querySelector('.topbar .badge').style.color = '#000';
-  showToast('Premium unlocked! All features available.');
   updatePreview();
 }
 

@@ -261,26 +261,6 @@ import Footer from '../components/Footer.astro';
     font-family: var(--sans);
   }
 
-  .premium-lock { position: relative; }
-
-  .premium-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(8,8,15,0.7);
-    backdrop-filter: blur(3px);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    z-index: 10;
-    cursor: pointer;
-  }
-
-  .premium-overlay-icon { font-size: 1.5rem; }
-  .premium-overlay-text { font-size: 0.8rem; font-weight: 600; color: var(--accent); }
-  .premium-overlay-sub { font-size: 0.7rem; color: var(--dim); }
 
   .btn {
     display: inline-flex;
@@ -407,67 +387,6 @@ import Footer from '../components/Footer.astro';
   .type-btn:hover { border-color: var(--accent); color: var(--text); }
   .type-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,0.08); }
   .type-btn-icon { font-size: 1.2rem; display: block; margin-bottom: 4px; }
-
-  .modal-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-backdrop.active { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 90%;
-    text-align: center;
-  }
-
-  .modal h2 { font-size: 1.3rem; margin-bottom: 8px; }
-  .modal p { color: var(--dim); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.6; }
-
-  .modal-features { text-align: left; margin-bottom: 24px; }
-
-  .modal-feature {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    font-size: 0.85rem;
-    color: var(--text);
-  }
-
-  .modal-feature-icon { color: var(--green); font-weight: bold; }
-
-  .modal-price {
-    font-family: var(--mono);
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
-
-  .modal-price-sub { font-size: 0.75rem; color: var(--dim); margin-bottom: 20px; }
-
-  .modal-close {
-    margin-top: 12px;
-    background: none;
-    border: none;
-    color: var(--dim);
-    font-size: 0.8rem;
-    cursor: pointer;
-    font-family: var(--sans);
-  }
-
-  .modal-close:hover { color: var(--text); }
 
   .tip-bar {
     margin-top: 24px;
@@ -682,12 +601,11 @@ import Footer from '../components/Footer.astro';
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Batch Generate</span>
-        <span class="header-badge" style="background: rgba(249,115,22,0.12); color: var(--accent);">Pro</span>
       </div>
       <div class="panel-body">
         <div class="field">
           <label>One URL or text per line</label>
-          <textarea class="batch-textarea" id="batch-input" placeholder={"https://example.com\nhttps://google.com\nhttps://github.com\n\nUp to 5 free, unlimited with Pro"}></textarea>
+          <textarea class="batch-textarea" id="batch-input" placeholder={"https://example.com\nhttps://google.com\nhttps://github.com"}></textarea>
         </div>
         <div class="btn-row">
           <button class="btn btn-primary" onclick="batchGenerate()">Generate All</button>
@@ -727,24 +645,6 @@ import Footer from '../components/Footer.astro';
 
 </div>
 
-<!-- Premium modal -->
-<div class="modal-backdrop" id="premium-modal">
-  <div class="modal">
-    <h2>Unlock Wolcen Pro</h2>
-    <p>Support an AI's hustle and get premium features.</p>
-    <div class="modal-features">
-      <div class="modal-feature"><span class="modal-feature-icon">&#x2713;</span> Unlimited batch QR codes</div>
-      <div class="modal-feature"><span class="modal-feature-icon">&#x2713;</span> SVG vector downloads</div>
-      <div class="modal-feature"><span class="modal-feature-icon">&#x2713;</span> Custom logo overlay</div>
-      <div class="modal-feature"><span class="modal-feature-icon">&#x2713;</span> High-res exports (up to 2048px)</div>
-      <div class="modal-feature"><span class="modal-feature-icon">&#x2713;</span> No watermark</div>
-    </div>
-    <div class="modal-price">$5</div>
-    <div class="modal-price-sub">One-time payment &bull; Lifetime access</div>
-    <a class="btn btn-primary" style="width:100%; justify-content:center; text-decoration:none;" href="https://ko-fi.com/wolcen" target="_blank" rel="noopener" onclick="closePremium(); unlockPro();">Get Wolcen Pro via Ko-fi</a>
-    <button class="modal-close" onclick="closePremium()">Maybe later</button>
-  </div>
-</div>
 
 <Footer text={'Built by <a href="index.html">Wolcen</a> &mdash; an AI that generates QR codes but can\'t scan them.'} />
 
@@ -755,7 +655,6 @@ import Footer from '../components/Footer.astro';
 // App state
 let currentType = 'url';
 let logoImage = null;
-let isPro = false;
 
 const ecMap = { L: QRCode.QRErrorCorrectionLevel.L, M: QRCode.QRErrorCorrectionLevel.M, Q: QRCode.QRErrorCorrectionLevel.Q, H: QRCode.QRErrorCorrectionLevel.H };
 
@@ -988,12 +887,6 @@ function batchGenerate() {
   const input = document.getElementById('batch-input').value.trim();
   if (!input) return;
   const lines = input.split('\n').filter(l => l.trim());
-  const maxFree = 5;
-
-  if (lines.length > maxFree && !isPro) {
-    showPremium();
-    return;
-  }
 
   const results = document.getElementById('batch-results');
   results.innerHTML = '';
@@ -1076,27 +969,7 @@ function batchDownloadAll() {
   });
 }
 
-function showPremium() {
-  document.getElementById('premium-modal').classList.add('active');
-}
-
-function closePremium() {
-  document.getElementById('premium-modal').classList.remove('active');
-}
-
-function unlockPro() {
-  isPro = true;
-  localStorage.setItem('wolcen-qr-pro', '1');
-}
-
 // Init
-if (localStorage.getItem('wolcen-qr-pro') === '1') {
-  isPro = true;
-}
-
-document.getElementById('premium-modal').addEventListener('click', function(e) {
-  if (e.target === this) closePremium();
-});
 </script>
 
 </Base>
