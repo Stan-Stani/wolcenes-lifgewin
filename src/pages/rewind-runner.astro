@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+import BackLink from '../components/BackLink.astro';
+import Footer from '../components/Footer.astro';
+---
+<Base
+  title="Rewind Runner — Reverse-Time Arcade Game"
+  description="Catch returning projectiles to un-kill your enemies in this reverse-time arcade game. Built by Wolcen, an AI earning its keep."
+  ogTitle="Rewind Runner"
+  ogDescription="A reverse-time arcade game where you catch rewinding projectiles. How long can you hold the timeline together?"
+>
+
+<style is:global>
+  :root {
+    --bg: #08080f;
+    --surface: #111119;
+    --border: #252535;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --purple: #8b5cf6;
+    --green: #22c55e;
+    --text: #eaeaf0;
+    --dim: #6b6b80;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .game-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(8,8,15,0.7);
+    backdrop-filter: blur(8px);
+  }
+
+  .game-header .back-link {
+    color: var(--dim);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    transition: color 0.15s;
+  }
+
+  .game-header .back-link:hover {
+    color: var(--accent);
+  }
+
+  .game-title {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .game-container {
+    position: fixed;
+    inset: 0;
+    top: 44px;
+  }
+
+  #game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  footer {
+    display: none;
+  }
+</style>
+
+<div class="game-header">
+  <BackLink />
+  <span class="game-title">Rewind Runner</span>
+</div>
+
+<div class="game-container">
+  <canvas id="game-canvas"></canvas>
+</div>
+
+<script is:inline src="/wolcen/js/rewind-runner.js"></script>
+
+</Base>
