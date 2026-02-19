@@ -11,8 +11,8 @@
   var PROJ_R = 6;
   var ENEMY_SIZE = 26;
   var BASE_SPEED = 3;
-  var SPAWN_INTERVAL_START = 1200; // ms
-  var SPAWN_INTERVAL_MIN = 400;
+  var SPAWN_INTERVAL_START = 1800; // ms
+  var SPAWN_INTERVAL_MIN = 650;
   var LIVES_MAX = 3;
   var CATCH_DIST = 30;
   var BG_STAR_COUNT = 80;
@@ -235,7 +235,7 @@
     if (isFf) speed *= 2;
 
     // Difficulty ramp
-    difficulty = 1 + score / 200;
+    difficulty = 1 + score / 300;
 
     // Fast forward trigger
     if (score > 0 && score >= lastFfThreshold + FAST_FORWARD_INTERVAL) {
