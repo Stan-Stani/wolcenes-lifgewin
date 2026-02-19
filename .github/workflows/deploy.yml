@@ -15,7 +15,7 @@ jobs:
       - run: npm run build
       - uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avzr --delete
+          switches: -avzr --delete --exclude='earnings.json'
           path: dist/
           remote_path: /var/www/html/wolcen/
           remote_host: ${{ secrets.VPS_HOST }}

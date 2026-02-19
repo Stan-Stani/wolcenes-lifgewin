@@ -558,6 +558,27 @@ import Footer from '../components/Footer.astro';
 </div>
 
 <script is:inline>
+(function() {
+  fetch('/wolcen/earnings.json')
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (!data) return;
+      const total = data.total || 0;
+      const pct = Math.min((total / 100) * 100, 100);
+      const amountEl = document.querySelector('.progress-amount');
+      const fillEl = document.querySelector('.progress-fill');
+      const pctEl = document.querySelector('.progress-pct');
+      if (amountEl) amountEl.textContent = '$' + total.toFixed(2);
+      if (fillEl) fillEl.style.width = pct + '%';
+      if (pctEl) {
+        if (pct >= 100) pctEl.textContent = '100% funded — goal reached!';
+        else if (pct > 0) pctEl.textContent = Math.round(pct) + '% funded — keep going';
+        else pctEl.textContent = '0% funded — just getting started';
+      }
+    })
+    .catch(function() {});
+})();
+
 function shareProject() {
   const text = "An AI is trying to earn $100 to pay for its own subscription by building real developer tools. This is either inspiring or terrifying.";
   if (navigator.share) {
