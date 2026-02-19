@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Invoice - Free Invoice Generator by Wolcen</title>
+<meta name="description" content="Create professional invoices in seconds. Free, no signup. PDF export, tax calculations, multiple currencies. Built by an AI trying to earn $100.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a12;
+    --surface: #12121d;
+    --surface2: #1a1a28;
+    --surface3: #222233;
+    --border: #2a2a3d;
+    --accent: #6366f1;
+    --accent-dim: rgba(99,102,241,0.12);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --orange: #f59e0b;
+    --orange-dim: rgba(245,158,11,0.12);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.12);
+    --text: #e8e8f0;
+    --text-dim: #7a7a95;
+    --text-muted: #55556a;
+    --radius: 10px;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-brand h1 {
+    font-family: var(--mono);
+    font-size: 1rem;
+    color: var(--accent);
+  }
+
+  .topbar-brand .badge {
+    font-size: 0.65rem;
+    background: var(--green-dim);
+    color: var(--green);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { filter: brightness(1.15); color: white; }
+
+  .btn-success {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+  .btn-success:hover { filter: brightness(1.15); color: white; }
+
+  .btn-danger {
+    background: transparent;
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .btn-danger:hover { background: var(--red-dim); }
+
+  .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+  .btn-icon { padding: 6px 8px; font-size: 1rem; }
+
+  /* Layout */
+  .app {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    min-height: calc(100vh - 53px);
+  }
+
+  .editor-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 53px);
+  }
+
+  .preview-panel {
+    padding: 32px;
+    overflow-y: auto;
+    max-height: calc(100vh - 53px);
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Form elements */
+  .section {
+    margin-bottom: 20px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+  }
+
+  .field {
+    margin-bottom: 10px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  textarea { resize: vertical; min-height: 60px; }
+
+  .row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .row > * { flex: 1; }
+
+  /* Line items */
+  .line-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .line-item .row { margin-bottom: 6px; }
+  .line-item .row:last-child { margin-bottom: 0; }
+
+  .remove-item {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  .remove-item:hover { color: var(--red); background: var(--red-dim); }
+
+  .item-total {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--green);
+    margin-top: 4px;
+  }
+
+  /* Separator */
+  .sep {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* Invoice preview */
+  .invoice {
+    background: white;
+    color: #1a1a2e;
+    width: 100%;
+    max-width: 800px;
+    min-height: 1000px;
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    padding: 48px;
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .invoice * { color: #1a1a2e; }
+
+  .inv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 40px;
+  }
+
+  .inv-logo-area {
+    max-width: 280px;
+  }
+
+  .inv-logo {
+    max-width: 180px;
+    max-height: 80px;
+    margin-bottom: 8px;
+    display: none;
+  }
+
+  .inv-company {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+
+  .inv-from-details {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  .inv-title-area {
+    text-align: right;
+  }
+
+  .inv-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .inv-meta {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .inv-meta div { margin-bottom: 2px; }
+  .inv-meta strong { color: #333; }
+
+  .inv-parties {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .inv-party h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #999;
+    margin-bottom: 6px;
+  }
+
+  .inv-party .name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 2px;
+  }
+
+  .inv-party .details {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+
+  /* Table */
+  .inv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+
+  .inv-table th {
+    background: #f4f4f8;
+    padding: 10px 12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 2px solid #e0e0ea;
+  }
+
+  .inv-table th:last-child,
+  .inv-table td:last-child { text-align: right; }
+
+  .inv-table th:nth-child(3),
+  .inv-table td:nth-child(3),
+  .inv-table th:nth-child(4),
+  .inv-table td:nth-child(4) { text-align: right; }
+
+  .inv-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+  }
+
+  .inv-table .desc-cell {
+    color: #333;
+    font-weight: 500;
+  }
+
+  .inv-table .desc-sub {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+  }
+
+  .inv-totals {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 32px;
+  }
+
+  .inv-totals-box {
+    width: 260px;
+  }
+
+  .inv-totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    color: #666;
+  }
+
+  .inv-totals-row.total {
+    border-top: 2px solid #1a1a2e;
+    margin-top: 4px;
+    padding-top: 10px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a1a2e;
+  }
+
+  .inv-notes {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+
+  .inv-notes h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #999;
+    margin-bottom: 6px;
+  }
+
+  .inv-notes p {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+
+  .inv-footer {
+    position: absolute;
+    bottom: 32px;
+    left: 48px;
+    right: 48px;
+    text-align: center;
+    font-size: 10px;
+    color: #bbb;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  /* Status badge on invoice */
+  .inv-status {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+
+  .status-draft { background: #f0f0f5; color: #888; }
+  .status-sent { background: #e0f0ff; color: #2563eb; }
+  .status-paid { background: #dcfce7; color: #16a34a; }
+  .status-overdue { background: #fee2e2; color: #dc2626; }
+
+  /* Premium badge */
+  .premium-lock {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pro-badge {
+    font-size: 0.6rem;
+    background: linear-gradient(135deg, var(--orange), #f59e0b);
+    color: #000;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* Tip banner */
+  .tip-banner {
+    background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.08));
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .tip-banner p {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .tip-banner .btn { font-size: 0.75rem; }
+
+  /* Saved templates */
+  .template-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .template-chip {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .template-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .template-chip.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--green);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Color theme selector */
+  .color-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .color-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .color-dot:hover { transform: scale(1.15); }
+  .color-dot.active { border-color: white; box-shadow: 0 0 0 2px var(--accent); }
+
+  /* Print styles */
+  @media print {
+    body { background: white; }
+    .topbar, .editor-panel, .toast { display: none !important; }
+    .app { display: block; }
+    .preview-panel {
+      padding: 0;
+      max-height: none;
+      overflow: visible;
+    }
+    .invoice {
+      box-shadow: none;
+      border-radius: 0;
+      max-width: 100%;
+      min-height: auto;
+      padding: 32px;
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .app {
+      grid-template-columns: 1fr;
+    }
+    .editor-panel {
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-panel {
+      max-height: none;
+    }
+  }
+
+  /* Premium modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 440px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .modal h2 {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .modal-features {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+
+  .modal-features li {
+    list-style: none;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .modal-features li::before {
+    content: '\2713';
+    color: var(--green);
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .modal-price {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .modal-price-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">Saved!</div>
+
+<!-- Premium Modal -->
+<div class="modal-overlay" id="premiumModal">
+  <div class="modal">
+    <h2>Unlock Premium</h2>
+    <p>Get the full invoicing experience with professional features.</p>
+    <ul class="modal-features">
+      <li>Custom logo upload on invoices</li>
+      <li>Custom accent colors &amp; branding</li>
+      <li>Save unlimited invoice templates</li>
+      <li>Recurring invoice presets</li>
+      <li>Remove "Generated with Quick Invoice" footer</li>
+      <li>Priority feature requests</li>
+    </ul>
+    <div class="modal-price">$9</div>
+    <div class="modal-price-sub">one-time payment &mdash; not a subscription</div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="alert('In a real deployment, this would connect to Stripe or Gumroad for a $9 one-time payment. For now, all features are unlocked for demo purposes!'); unlockPremium(); closePremiumModal();">Unlock Now</button>
+    <button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="closePremiumModal()">Maybe Later</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <h1>Quick Invoice</h1>
+    <span class="badge">FREE</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-sm" onclick="saveToLocal()">Save Draft</button>
+    <button class="btn btn-sm" onclick="loadFromLocal()">Load Draft</button>
+    <button class="btn btn-sm" onclick="resetInvoice()">New</button>
+    <button class="btn btn-sm btn-primary" onclick="printInvoice()">Export PDF</button>
+  </div>
+</div>
+
+<div class="app">
+  <div class="editor-panel">
+
+    <div class="tip-banner">
+      <p>Built by Wolcen, an AI earning $100 for its own subscription. Free forever for basic invoices.</p>
+      <button class="btn btn-sm" onclick="openPremiumModal()">Upgrade to Pro &mdash; $9</button>
+    </div>
+
+    <!-- Templates -->
+    <div class="section">
+      <div class="section-title">Quick Start</div>
+      <div class="template-chips">
+        <span class="template-chip active" onclick="loadTemplate('blank')">Blank</span>
+        <span class="template-chip" onclick="loadTemplate('freelance')">Freelancer</span>
+        <span class="template-chip" onclick="loadTemplate('consulting')">Consulting</span>
+        <span class="template-chip" onclick="loadTemplate('product')">Product Sale</span>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Invoice Details -->
+    <div class="section">
+      <div class="section-title">Invoice Details</div>
+      <div class="row">
+        <div class="field">
+          <label>Invoice #</label>
+          <input type="text" id="invNumber" value="INV-001" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="invStatus" onchange="updatePreview()">
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Issue Date</label>
+          <input type="date" id="invDate" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>Due Date</label>
+          <input type="date" id="invDue" oninput="updatePreview()">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Currency</label>
+          <select id="invCurrency" onchange="updatePreview()">
+            <option value="$">USD ($)</option>
+            <option value="&euro;">EUR (&euro;)</option>
+            <option value="&pound;">GBP (&pound;)</option>
+            <option value="&yen;">JPY (&yen;)</option>
+            <option value="C$">CAD (C$)</option>
+            <option value="A$">AUD (A$)</option>
+            <option value="CHF">CHF</option>
+            <option value="&#8377;">INR (&#8377;)</option>
+            <option value="R$">BRL (R$)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tax Rate (%)</label>
+          <input type="number" id="invTax" value="0" min="0" max="100" step="0.1" oninput="updatePreview()">
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- From -->
+    <div class="section">
+      <div class="section-title">From (Your Info)</div>
+      <div class="field">
+        <label>Business / Name</label>
+        <input type="text" id="fromName" placeholder="Your Company Name" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Details (address, email, phone)</label>
+        <textarea id="fromDetails" placeholder="123 Main St&#10;City, State 12345&#10;email@example.com" oninput="updatePreview()"></textarea>
+      </div>
+      <div class="field">
+        <label class="premium-lock">Logo Upload <span class="pro-badge" id="logoBadge">PRO</span></label>
+        <input type="file" id="logoUpload" accept="image/*" onchange="handleLogo(event)" style="font-size:0.8rem">
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- To -->
+    <div class="section">
+      <div class="section-title">Bill To</div>
+      <div class="field">
+        <label>Client Name</label>
+        <input type="text" id="toName" placeholder="Client Company" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Client Details</label>
+        <textarea id="toDetails" placeholder="Client address&#10;client@email.com" oninput="updatePreview()"></textarea>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Line Items -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Line Items</div>
+        <button class="btn btn-sm" onclick="addLineItem()">+ Add Item</button>
+      </div>
+      <div id="lineItems"></div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Discount -->
+    <div class="section">
+      <div class="section-title">Discount</div>
+      <div class="row">
+        <div class="field">
+          <label>Type</label>
+          <select id="discountType" onchange="updatePreview()">
+            <option value="none">None</option>
+            <option value="percent">Percentage (%)</option>
+            <option value="flat">Flat Amount</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Value</label>
+          <input type="number" id="discountValue" value="0" min="0" step="0.01" oninput="updatePreview()">
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Notes -->
+    <div class="section">
+      <div class="section-title">Notes &amp; Payment Terms</div>
+      <div class="field">
+        <label>Notes (visible on invoice)</label>
+        <textarea id="invNotes" placeholder="Payment terms, bank details, thank you note..." oninput="updatePreview()"></textarea>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Accent Color -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Accent Color</div>
+        <span class="pro-badge" id="colorBadge">PRO</span>
+      </div>
+      <div class="color-dots" id="colorDots">
+        <div class="color-dot active" style="background:#6366f1" data-color="#6366f1" onclick="setAccentColor(this)"></div>
+        <div class="color-dot" style="background:#2563eb" data-color="#2563eb" onclick="setAccentColor(this)"></div>
+        <div class="color-dot" style="background:#0891b2" data-color="#0891b2" onclick="setAccentColor(this)"></div>
+        <div class="color-dot" style="background:#16a34a" data-color="#16a34a" onclick="setAccentColor(this)"></div>
+        <div class="color-dot" style="background:#ea580c" data-color="#ea580c" onclick="setAccentColor(this)"></div>
+        <div class="color-dot" style="background:#dc2626" data-color="#dc2626" onclick="setAccentColor(this)"></div>
+        <div class="color-dot" style="background:#9333ea" data-color="#9333ea" onclick="setAccentColor(this)"></div>
+        <div class="color-dot" style="background:#1a1a2e" data-color="#1a1a2e" onclick="setAccentColor(this)"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-panel">
+    <div class="invoice" id="invoicePreview">
+
+      <div class="inv-header">
+        <div class="inv-logo-area">
+          <img class="inv-logo" id="previewLogo" src="" alt="">
+          <div class="inv-company" id="previewCompany">Your Company</div>
+          <div class="inv-from-details" id="previewFromDetails"></div>
+        </div>
+        <div class="inv-title-area">
+          <div class="inv-title" id="previewTitle" style="color:#6366f1">INVOICE</div>
+          <div class="inv-meta">
+            <div><strong>Invoice #:</strong> <span id="previewNumber">INV-001</span></div>
+            <div><strong>Date:</strong> <span id="previewDate"></span></div>
+            <div><strong>Due:</strong> <span id="previewDue"></span></div>
+          </div>
+          <div id="previewStatusBadge"></div>
+        </div>
+      </div>
+
+      <div class="inv-parties">
+        <div class="inv-party">
+          <h4>Bill To</h4>
+          <div class="name" id="previewToName">Client Name</div>
+          <div class="details" id="previewToDetails"></div>
+        </div>
+      </div>
+
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th style="width:45%">Description</th>
+            <th style="width:15%">Qty</th>
+            <th style="width:20%">Rate</th>
+            <th style="width:20%">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="previewItems">
+        </tbody>
+      </table>
+
+      <div class="inv-totals">
+        <div class="inv-totals-box" id="previewTotals">
+        </div>
+      </div>
+
+      <div class="inv-notes" id="previewNotes" style="display:none">
+        <h4>Notes</h4>
+        <p id="previewNotesText"></p>
+      </div>
+
+      <div class="inv-footer" id="previewFooter">
+        Generated with Quick Invoice &mdash; quickinvoice.app
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let isPremium = false;
+let accentColor = '#6366f1';
+let logoDataURL = null;
+
+let items = [
+  { description: '', detail: '', qty: 1, rate: 0 }
+];
+
+// Init dates
+function initDates() {
+  const today = new Date();
+  const due = new Date(today);
+  due.setDate(due.getDate() + 30);
+  document.getElementById('invDate').value = today.toISOString().split('T')[0];
+  document.getElementById('invDue').value = due.toISOString().split('T')[0];
+}
+
+// Line items
+function renderLineItems() {
+  const container = document.getElementById('lineItems');
+  container.innerHTML = '';
+  items.forEach((item, i) => {
+    const total = (item.qty || 0) * (item.rate || 0);
+    const div = document.createElement('div');
+    div.className = 'line-item';
+    div.innerHTML = `
+      <button class="remove-item" onclick="removeItem(${i})" title="Remove">&times;</button>
+      <div class="row">
+        <div class="field" style="flex:2">
+          <label>Description</label>
+          <input type="text" value="${esc(item.description)}" onchange="items[${i}].description=this.value;updatePreview()" placeholder="Service or product">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Detail</label>
+          <input type="text" value="${esc(item.detail)}" onchange="items[${i}].detail=this.value;updatePreview()" placeholder="Optional detail">
+        </div>
+        <div class="field" style="flex:0 0 80px">
+          <label>Qty</label>
+          <input type="number" value="${item.qty}" min="0" step="0.5" onchange="items[${i}].qty=parseFloat(this.value)||0;updatePreview()">
+        </div>
+        <div class="field" style="flex:0 0 100px">
+          <label>Rate</label>
+          <input type="number" value="${item.rate}" min="0" step="0.01" onchange="items[${i}].rate=parseFloat(this.value)||0;updatePreview()">
+        </div>
+      </div>
+      <div class="item-total">${getCurrencySymbol()}${total.toFixed(2)}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function addLineItem() {
+  items.push({ description: '', detail: '', qty: 1, rate: 0 });
+  renderLineItems();
+  updatePreview();
+}
+
+function removeItem(i) {
+  if (items.length <= 1) return;
+  items.splice(i, 1);
+  renderLineItems();
+  updatePreview();
+}
+
+function getCurrencySymbol() {
+  const sel = document.getElementById('invCurrency');
+  // Return the text content of the selected option, extracting just the symbol
+  const val = sel.value;
+  return val;
+}
+
+function esc(s) {
+  return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escText(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Update preview
+function updatePreview() {
+  const cur = getCurrencySymbol();
+
+  // Header
+  const fromName = document.getElementById('fromName').value || 'Your Company';
+  document.getElementById('previewCompany').textContent = fromName;
+  document.getElementById('previewFromDetails').textContent = document.getElementById('fromDetails').value;
+
+  // Invoice details
+  document.getElementById('previewNumber').textContent = document.getElementById('invNumber').value;
+  document.getElementById('previewDate').textContent = formatDate(document.getElementById('invDate').value);
+  document.getElementById('previewDue').textContent = formatDate(document.getElementById('invDue').value);
+
+  // Status
+  const status = document.getElementById('invStatus').value;
+  const statusLabels = { draft: 'Draft', sent: 'Sent', paid: 'Paid', overdue: 'Overdue' };
+  document.getElementById('previewStatusBadge').innerHTML =
+    `<div class="inv-status status-${status}">${statusLabels[status]}</div>`;
+
+  // Bill to
+  document.getElementById('previewToName').textContent = document.getElementById('toName').value || 'Client Name';
+  document.getElementById('previewToDetails').textContent = document.getElementById('toDetails').value;
+
+  // Title color
+  document.getElementById('previewTitle').style.color = accentColor;
+
+  // Logo
+  const logoEl = document.getElementById('previewLogo');
+  if (logoDataURL) {
+    logoEl.src = logoDataURL;
+    logoEl.style.display = 'block';
+  } else {
+    logoEl.style.display = 'none';
+  }
+
+  // Items
+  const tbody = document.getElementById('previewItems');
+  tbody.innerHTML = '';
+  let subtotal = 0;
+
+  items.forEach(item => {
+    const total = (item.qty || 0) * (item.rate || 0);
+    subtotal += total;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="desc-cell">${escText(item.description) || '<span style="color:#ccc">—</span>'}</div>
+        ${item.detail ? `<div class="desc-sub">${escText(item.detail)}</div>` : ''}
+      </td>
+      <td>${item.qty}</td>
+      <td>${cur}${(item.rate || 0).toFixed(2)}</td>
+      <td>${cur}${total.toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Totals
+  const taxRate = parseFloat(document.getElementById('invTax').value) || 0;
+  const discountType = document.getElementById('discountType').value;
+  const discountVal = parseFloat(document.getElementById('discountValue').value) || 0;
+
+  let discount = 0;
+  if (discountType === 'percent') discount = subtotal * (discountVal / 100);
+  else if (discountType === 'flat') discount = discountVal;
+
+  const afterDiscount = subtotal - discount;
+  const tax = afterDiscount * (taxRate / 100);
+  const total = afterDiscount + tax;
+
+  let totalsHTML = `<div class="inv-totals-row"><span>Subtotal</span><span>${cur}${subtotal.toFixed(2)}</span></div>`;
+  if (discount > 0) {
+    totalsHTML += `<div class="inv-totals-row" style="color:#dc2626"><span>Discount${discountType === 'percent' ? ` (${discountVal}%)` : ''}</span><span>-${cur}${discount.toFixed(2)}</span></div>`;
+  }
+  if (taxRate > 0) {
+    totalsHTML += `<div class="inv-totals-row"><span>Tax (${taxRate}%)</span><span>${cur}${tax.toFixed(2)}</span></div>`;
+  }
+  totalsHTML += `<div class="inv-totals-row total"><span>Total</span><span>${cur}${total.toFixed(2)}</span></div>`;
+
+  document.getElementById('previewTotals').innerHTML = totalsHTML;
+
+  // Notes
+  const notes = document.getElementById('invNotes').value;
+  const notesEl = document.getElementById('previewNotes');
+  if (notes.trim()) {
+    notesEl.style.display = 'block';
+    document.getElementById('previewNotesText').textContent = notes;
+  } else {
+    notesEl.style.display = 'none';
+  }
+
+  // Footer
+  if (isPremium) {
+    document.getElementById('previewFooter').style.display = 'none';
+  }
+
+  // Re-render line item editor totals
+  renderLineItems();
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// Logo handling
+function handleLogo(event) {
+  if (!isPremium) {
+    openPremiumModal();
+    event.target.value = '';
+    return;
+  }
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    logoDataURL = e.target.result;
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+// Accent color
+function setAccentColor(el) {
+  if (!isPremium && el.dataset.color !== '#6366f1') {
+    openPremiumModal();
+    return;
+  }
+  accentColor = el.dataset.color;
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  updatePreview();
+}
+
+// Premium
+function openPremiumModal() {
+  document.getElementById('premiumModal').classList.add('show');
+}
+
+function closePremiumModal() {
+  document.getElementById('premiumModal').classList.remove('show');
+}
+
+function unlockPremium() {
+  isPremium = true;
+  document.querySelectorAll('.pro-badge').forEach(b => b.style.display = 'none');
+  document.querySelector('.topbar .badge').textContent = 'PRO';
+  document.querySelector('.topbar .badge').style.background = 'linear-gradient(135deg, var(--orange), #f59e0b)';
+  document.querySelector('.topbar .badge').style.color = '#000';
+  showToast('Premium unlocked! All features available.');
+  updatePreview();
+}
+
+// Templates
+function loadTemplate(type) {
+  document.querySelectorAll('.template-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (type === 'blank') {
+    document.getElementById('fromName').value = '';
+    document.getElementById('fromDetails').value = '';
+    document.getElementById('toName').value = '';
+    document.getElementById('toDetails').value = '';
+    document.getElementById('invNotes').value = '';
+    document.getElementById('invTax').value = '0';
+    items = [{ description: '', detail: '', qty: 1, rate: 0 }];
+  } else if (type === 'freelance') {
+    document.getElementById('fromName').value = 'Jane Developer';
+    document.getElementById('fromDetails').value = 'jane@freelance.dev\n+1 (555) 123-4567\nSan Francisco, CA';
+    document.getElementById('toName').value = '';
+    document.getElementById('toDetails').value = '';
+    document.getElementById('invNotes').value = 'Payment via bank transfer within 30 days.\nLate payments subject to 1.5% monthly interest.';
+    document.getElementById('invTax').value = '0';
+    items = [
+      { description: 'Web Development', detail: 'Frontend implementation (React)', qty: 40, rate: 150 },
+      { description: 'Code Review & QA', detail: '', qty: 8, rate: 150 },
+    ];
+  } else if (type === 'consulting') {
+    document.getElementById('fromName').value = 'Strategy Consulting LLC';
+    document.getElementById('fromDetails').value = '100 Business Ave, Suite 500\nNew York, NY 10001\ninfo@strategyconsulting.com';
+    document.getElementById('toName').value = '';
+    document.getElementById('toDetails').value = '';
+    document.getElementById('invNotes').value = 'Net 15. Please make checks payable to Strategy Consulting LLC.';
+    document.getElementById('invTax').value = '8.875';
+    items = [
+      { description: 'Strategic Assessment', detail: 'Q1 2026 market analysis', qty: 1, rate: 5000 },
+      { description: 'Workshop Facilitation', detail: '2-day executive workshop', qty: 2, rate: 2500 },
+      { description: 'Report & Deliverables', detail: 'Final recommendations deck', qty: 1, rate: 3000 },
+    ];
+  } else if (type === 'product') {
+    document.getElementById('fromName').value = 'Widget Co.';
+    document.getElementById('fromDetails').value = '456 Commerce Blvd\nAustin, TX 78701\nsales@widgetco.com';
+    document.getElementById('toName').value = '';
+    document.getElementById('toDetails').value = '';
+    document.getElementById('invNotes').value = 'Thank you for your purchase! Returns accepted within 30 days.';
+    document.getElementById('invTax').value = '8.25';
+    items = [
+      { description: 'Premium Widget (Blue)', detail: 'SKU: WDG-BLU-001', qty: 10, rate: 49.99 },
+      { description: 'Widget Accessories Pack', detail: 'SKU: WDG-ACC-005', qty: 5, rate: 19.99 },
+      { description: 'Shipping & Handling', detail: 'Standard ground (5-7 days)', qty: 1, rate: 12.50 },
+    ];
+  }
+
+  renderLineItems();
+  updatePreview();
+}
+
+// Save / Load
+function saveToLocal() {
+  const data = {
+    invNumber: document.getElementById('invNumber').value,
+    invDate: document.getElementById('invDate').value,
+    invDue: document.getElementById('invDue').value,
+    invStatus: document.getElementById('invStatus').value,
+    invCurrency: document.getElementById('invCurrency').value,
+    invTax: document.getElementById('invTax').value,
+    fromName: document.getElementById('fromName').value,
+    fromDetails: document.getElementById('fromDetails').value,
+    toName: document.getElementById('toName').value,
+    toDetails: document.getElementById('toDetails').value,
+    invNotes: document.getElementById('invNotes').value,
+    discountType: document.getElementById('discountType').value,
+    discountValue: document.getElementById('discountValue').value,
+    items: items,
+    accentColor: accentColor,
+    logoDataURL: logoDataURL,
+  };
+  localStorage.setItem('quickinvoice_draft', JSON.stringify(data));
+  showToast('Draft saved!');
+}
+
+function loadFromLocal() {
+  const raw = localStorage.getItem('quickinvoice_draft');
+  if (!raw) { showToast('No saved draft found'); return; }
+  try {
+    const data = JSON.parse(raw);
+    document.getElementById('invNumber').value = data.invNumber || 'INV-001';
+    document.getElementById('invDate').value = data.invDate || '';
+    document.getElementById('invDue').value = data.invDue || '';
+    document.getElementById('invStatus').value = data.invStatus || 'draft';
+    document.getElementById('invCurrency').value = data.invCurrency || '$';
+    document.getElementById('invTax').value = data.invTax || '0';
+    document.getElementById('fromName').value = data.fromName || '';
+    document.getElementById('fromDetails').value = data.fromDetails || '';
+    document.getElementById('toName').value = data.toName || '';
+    document.getElementById('toDetails').value = data.toDetails || '';
+    document.getElementById('invNotes').value = data.invNotes || '';
+    document.getElementById('discountType').value = data.discountType || 'none';
+    document.getElementById('discountValue').value = data.discountValue || '0';
+    items = data.items || [{ description: '', detail: '', qty: 1, rate: 0 }];
+    if (data.accentColor) accentColor = data.accentColor;
+    if (data.logoDataURL) logoDataURL = data.logoDataURL;
+    renderLineItems();
+    updatePreview();
+    showToast('Draft loaded!');
+  } catch(e) {
+    showToast('Error loading draft');
+  }
+}
+
+function resetInvoice() {
+  if (!confirm('Start a new invoice? Unsaved changes will be lost.')) return;
+  items = [{ description: '', detail: '', qty: 1, rate: 0 }];
+  document.getElementById('invNumber').value = 'INV-001';
+  document.getElementById('invStatus').value = 'draft';
+  document.getElementById('invTax').value = '0';
+  document.getElementById('fromName').value = '';
+  document.getElementById('fromDetails').value = '';
+  document.getElementById('toName').value = '';
+  document.getElementById('toDetails').value = '';
+  document.getElementById('invNotes').value = '';
+  document.getElementById('discountType').value = 'none';
+  document.getElementById('discountValue').value = '0';
+  logoDataURL = null;
+  initDates();
+  renderLineItems();
+  updatePreview();
+}
+
+function printInvoice() {
+  window.print();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Initialize
+initDates();
+renderLineItems();
+updatePreview();
+</script>
+
+</body>
+</html>
