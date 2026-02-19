@@ -116,7 +116,9 @@
       x: W - 30 - Math.random() * 40,
       y: yPos + (Math.random() - 0.5) * 20,
       alive: false,
-      flashTimer: 0,
+      assembling: false,
+      assembleT: 0,    // 0→1 over assembly duration
+      shards: [],
       size: ENEMY_SIZE
     });
   }
@@ -227,12 +229,28 @@
       if (p.trail.length > 8) p.trail.shift();
       p.x += p.vx;
 
-      // Un-die nearby enemies
+      // Un-die nearby enemies — start reverse explosion assembly
       for (var e = 0; e < enemies.length; e++) {
         var en = enemies[e];
-        if (!en.alive && Math.abs(p.x - en.x) < 60 && Math.abs(p.y - en.y) < 40) {
-          en.alive = true;
-          en.flashTimer = 0.3;
+        if (!en.alive && !en.assembling && Math.abs(p.x - en.x) < 60 && Math.abs(p.y - en.y) < 40) {
+          en.assembling = true;
+          en.assembleT = 0;
+          en.shards = [];
+          // Spawn shards scattered outward
+          var shardCount = 10 + Math.floor(Math.random() * 4);
+          for (var sh = 0; sh < shardCount; sh++) {
+            var angle = (sh / shardCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+            var dist = 35 + Math.random() * 30;
+            en.shards.push({
+              ox: Math.cos(angle) * dist,  // start offset from enemy center
+              oy: Math.sin(angle) * dist,
+              rot: Math.random() * Math.PI * 2,
+              rotSpeed: (Math.random() - 0.5) * 8,
+              w: 3 + Math.random() * 6,
+              h: 3 + Math.random() * 5,
+              color: Math.random() > 0.3 ? COL_GREEN : (Math.random() > 0.5 ? '#fff' : COL_ACCENT)
+            });
+          }
         }
       }
 
@@ -266,11 +284,27 @@
       }
     }
 
-    // Enemies scroll left and clean up
+    // Enemies scroll left, tick assembly, clean up
     for (var k = enemies.length - 1; k >= 0; k--) {
-      enemies[k].x -= speed * 0.3;
-      if (enemies[k].flashTimer > 0) enemies[k].flashTimer -= dt / 1000;
-      if (enemies[k].x < -ENEMY_SIZE) enemies.splice(k, 1);
+      var ek = enemies[k];
+      ek.x -= speed * 0.3;
+      // Tick reverse explosion assembly
+      if (ek.assembling) {
+        ek.assembleT += dt / 500; // 500ms assembly duration
+        if (ek.assembleT >= 1) {
+          ek.assembleT = 1;
+          ek.assembling = false;
+          ek.alive = true;
+          ek.shards = [];
+          // Bright flash burst on completion
+          emitCatch(ek.x, ek.y);
+        }
+        // Spin shards as they converge
+        for (var si = 0; si < ek.shards.length; si++) {
+          ek.shards[si].rot += ek.shards[si].rotSpeed * (dt / 1000);
+        }
+      }
+      if (ek.x < -ENEMY_SIZE) enemies.splice(k, 1);
     }
 
     // Particles
@@ -343,12 +377,51 @@
       var en = enemies[e];
       ctx.save();
       ctx.translate(en.x, en.y);
-      if (en.alive) {
-        if (en.flashTimer > 0) {
-          ctx.fillStyle = '#fff';
-        } else {
-          ctx.fillStyle = COL_ENEMY_ALIVE;
+
+      if (en.assembling) {
+        // --- Reverse explosion: shards converge inward ---
+        var t = en.assembleT; // 0 → 1
+        // Ease-in: shards accelerate toward center
+        var ease = t * t;
+
+        // Draw converging shards
+        for (var si = 0; si < en.shards.length; si++) {
+          var sh = en.shards[si];
+          // Lerp from outer position to center
+          var sx = sh.ox * (1 - ease);
+          var sy = sh.oy * (1 - ease);
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.rotate(sh.rot * (1 - ease)); // spin slows as they converge
+          ctx.globalAlpha = 0.5 + t * 0.5;
+          ctx.fillStyle = sh.color;
+          ctx.fillRect(-sh.w / 2, -sh.h / 2, sh.w, sh.h);
+          ctx.restore();
         }
+
+        // Ghost of the enemy body fading in
+        ctx.globalAlpha = ease * 0.8;
+        ctx.fillStyle = COL_ENEMY_ALIVE;
+        var bodyScale = 0.3 + ease * 0.7;
+        var halfScaled = en.size * bodyScale / 2;
+        ctx.fillRect(-halfScaled, -halfScaled, en.size * bodyScale, en.size * bodyScale);
+
+        // Bright glow intensifies as assembly completes
+        ctx.globalAlpha = ease * 0.4;
+        ctx.beginPath();
+        ctx.arc(0, 0, en.size * (1.5 - ease * 0.5), 0, Math.PI * 2);
+        var ag = ctx.createRadialGradient(0, 0, 0, 0, 0, en.size * 1.5);
+        ag.addColorStop(0, 'rgba(34,197,94,0.6)');
+        ag.addColorStop(0.5, 'rgba(34,197,94,0.15)');
+        ag.addColorStop(1, 'rgba(34,197,94,0)');
+        ctx.fillStyle = ag;
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+
+      } else if (en.alive) {
+        // Fully assembled alive enemy
+        ctx.fillStyle = COL_ENEMY_ALIVE;
         ctx.fillRect(-en.size / 2, -en.size / 2, en.size, en.size);
         // Eyes
         ctx.fillStyle = COL_BG;
