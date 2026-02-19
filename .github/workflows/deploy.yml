@@ -1,0 +1,22 @@
+name: Deploy to VPS
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /root/wolcenes-lifgewin || git clone https://github.com/${{ github.repository }}.git /root/wolcenes-lifgewin
+            cd /root/wolcenes-lifgewin
+            git fetch origin
+            git reset --hard origin/main
+            mkdir -p /var/www/html/wolcen
+            cp -r *.html /var/www/html/wolcen/
+            exit 0
