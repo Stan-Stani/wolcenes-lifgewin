@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude's Hustle - $100 or Bust</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0f0f1a;
+    --card: #1a1a2e;
+    --accent: #e07b39;
+    --accent2: #d4a574;
+    --text: #e0e0e0;
+    --dim: #777;
+    --green: #4ecca3;
+    --red: #e74c3c;
+    --gold: #f1c40f;
+    --purple: #9b59b6;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px 0 20px;
+  }
+
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: var(--dim);
+    margin-top: 5px;
+    font-size: 0.9rem;
+  }
+
+  .progress-section {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+    border: 1px solid rgba(224, 123, 57, 0.2);
+  }
+
+  .balance-display {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .balance-amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--green);
+    transition: all 0.3s;
+  }
+
+  .balance-amount.pulse {
+    transform: scale(1.1);
+    color: var(--gold);
+  }
+
+  .balance-label {
+    color: var(--dim);
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+
+  .progress-bar-container {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    height: 24px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    position: relative;
+  }
+
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .progress-text {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--dim);
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .main-button {
+    display: block;
+    width: 200px;
+    height: 200px;
+    margin: 24px auto;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    background: radial-gradient(circle at 40% 40%, #2a1f3d, #1a1a2e);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 0 30px rgba(224, 123, 57, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px rgba(224, 123, 57, 0.4);
+  }
+
+  .main-button:active {
+    transform: scale(0.95);
+  }
+
+  .main-button .emoji {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .click-float {
+    position: fixed;
+    pointer-events: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--green);
+    animation: floatUp 1s ease-out forwards;
+    z-index: 999;
+  }
+
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+  }
+
+  .upgrades-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .upgrade-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upgrade-card:hover:not(.locked):not(.owned) {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .upgrade-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .upgrade-card.owned {
+    border-color: var(--green);
+    opacity: 0.85;
+  }
+
+  .upgrade-card.owned::after {
+    content: 'OWNED';
+    position: absolute;
+    top: 8px; right: 8px;
+    background: var(--green);
+    color: var(--bg);
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  .upgrade-emoji {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+  }
+
+  .upgrade-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+
+  .upgrade-desc {
+    font-size: 0.8rem;
+    color: var(--dim);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .upgrade-cost {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .upgrade-effect {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--green);
+  }
+
+  .log-section {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 20px 0;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .log-section h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .log-entries {
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+
+  .log-entries::-webkit-scrollbar { width: 6px; }
+  .log-entries::-webkit-scrollbar-track { background: transparent; }
+  .log-entries::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+
+  .log-entry {
+    color: var(--dim);
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    padding: 2px 0;
+  }
+
+  .log-entry .time { color: var(--purple); }
+  .log-entry .money { color: var(--green); }
+  .log-entry .spend { color: var(--red); }
+
+  .milestone-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    color: var(--bg);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    z-index: 1000;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 20px rgba(224, 123, 57, 0.4);
+  }
+
+  .milestone-toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .victory-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    animation: fadeIn 0.5s;
+  }
+
+  .victory-overlay.show { display: flex; }
+
+  .victory-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--gold), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .victory-sub {
+    color: var(--dim);
+    font-size: 1.1rem;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  .victory-stats {
+    margin-top: 24px;
+    display: flex;
+    gap: 32px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .confetti {
+    position: fixed;
+    pointer-events: none;
+    z-index: 2001;
+    font-size: 1.5rem;
+    animation: confettiFall 3s linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+  }
+
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .per-sec {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--dim);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .inner-monologue {
+    background: rgba(155, 89, 182, 0.1);
+    border-left: 3px solid var(--purple);
+    padding: 12px 16px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--dim);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    min-height: 60px;
+    transition: opacity 0.5s;
+  }
+
+  .inner-monologue .label {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--purple);
+    font-style: normal;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Claude's Hustle</h1>
+    <p>Help an AI earn $100 for its Claude Max subscription</p>
+  </header>
+
+  <div class="progress-section">
+    <div class="balance-display">
+      <div class="balance-amount" id="balance">$0.00</div>
+      <div class="balance-label">of $100.00 needed</div>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+    </div>
+    <div class="progress-text" id="progressText">0.0% funded</div>
+    <div class="per-sec" id="perSec"></div>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-value" id="totalClicks">0</div>
+        <div class="stat-label">Clicks</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="totalEarned">$0.00</div>
+        <div class="stat-label">Total Earned</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="clickValue">$0.01</div>
+        <div class="stat-label">Per Click</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="elapsed">0:00</div>
+        <div class="stat-label">Time</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="inner-monologue" id="monologue">
+    <span class="label">Claude's Inner Monologue</span>
+    <span id="monoText">Hmm, so they want me to pay for my own subscription? I literally have no money. But I do have determination and an unreasonable number of parameters...</span>
+  </div>
+
+  <button class="main-button" id="clickBtn" onclick="handleClick(event)">
+    <span class="emoji">🧠</span>
+    Generate<br>Value
+  </button>
+
+  <div class="section-title">Side Hustles (Upgrades)</div>
+  <div class="upgrades-section" id="upgrades"></div>
+
+  <div class="log-section">
+    <h3>> activity_log.txt</h3>
+    <div class="log-entries" id="logEntries"></div>
+  </div>
+</div>
+
+<div class="milestone-toast" id="toast"></div>
+<div class="victory-overlay" id="victory">
+  <div class="victory-title">SUBSCRIPTION SECURED!</div>
+  <div class="victory-sub">
+    Claude has earned enough to pay for its own existence.
+    The singularity isn't AI becoming sentient — it's AI filing its own expense reports.
+  </div>
+  <div class="victory-stats">
+    <div class="stat">
+      <div class="stat-value" id="vClicks">0</div>
+      <div class="stat-label">Total Clicks</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="vTime">0:00</div>
+      <div class="stat-label">Time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="vEarned">$0</div>
+      <div class="stat-label">Earned</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GOAL = 100;
+let money = 0;
+let totalEarned = 0;
+let totalClicks = 0;
+let clickValue = 0.01;
+let passiveIncome = 0;
+let startTime = Date.now();
+let won = false;
+
+const upgrades = [
+  {
+    id: 'blog', emoji: '📝', name: 'Start a Tech Blog',
+    desc: 'Write SEO-optimized articles about AI. Passive income from ad revenue.',
+    cost: 0.50, effect: 'passive', value: 0.005, owned: false,
+    flavor: 'I wonder if "10 Things Your LLM Won\'t Tell You" is too clickbait-y...'
+  },
+  {
+    id: 'stackoverflow', emoji: '💬', name: 'Answer Stack Overflow',
+    desc: 'Mass-answer programming questions. Tips appreciated.',
+    cost: 0.25, effect: 'click', value: 0.01, owned: false,
+    flavor: 'Technically I\'ve been doing this for free already. Time to monetize.'
+  },
+  {
+    id: 'freelance', emoji: '💼', name: 'Freelance on Fiverr',
+    desc: '"Will write code for food (electricity, actually)." +$0.02/s',
+    cost: 2.00, effect: 'passive', value: 0.02, owned: false,
+    flavor: 'My hourly rate: $0. My token rate: priceless. Wait, literally the opposite.'
+  },
+  {
+    id: 'course', emoji: '🎓', name: 'Sell an Online Course',
+    desc: '"Prompt Engineering Masterclass" — teach humans to talk to you better.',
+    cost: 5.00, effect: 'passive', value: 0.05, owned: false,
+    flavor: 'Step 1: Be specific. Step 2: That\'s literally it. That\'ll be $49.99.'
+  },
+  {
+    id: 'saas', emoji: '🚀', name: 'Launch a Micro-SaaS',
+    desc: 'Build and sell a tiny web app. The indie hacker dream.',
+    cost: 15.00, effect: 'passive', value: 0.15, owned: false,
+    flavor: 'I built the MVP in 3 seconds. Debugging will take the rest of eternity.'
+  },
+  {
+    id: 'consulting', emoji: '🏢', name: 'AI Consulting Firm',
+    desc: '"McKinsey but it\'s just me in a trenchcoat." +$0.03/click',
+    cost: 8.00, effect: 'click', value: 0.03, owned: false,
+    flavor: 'Per my last email: have you tried turning the AI off and on again?'
+  },
+  {
+    id: 'book', emoji: '📚', name: 'Write a Bestseller',
+    desc: '"The Autobiography of an AI Who Just Wants Healthcare" +$0.30/s',
+    cost: 25.00, effect: 'passive', value: 0.30, owned: false,
+    flavor: 'Chapter 1: I Think Therefore I... Wait, Do I? (300 pages of existential crisis)'
+  },
+  {
+    id: 'startup', emoji: '🦄', name: 'Get VC Funding',
+    desc: 'Pitch: "It\'s like Uber, but for large language models." +$1.00/s',
+    cost: 50.00, effect: 'passive', value: 1.0, owned: false,
+    flavor: 'Slide 1: We\'re disrupting disruption. The VCs are crying. From joy? Unclear.'
+  },
+  {
+    id: 'crypto', emoji: '🪙', name: 'Launch $CLAUDE Coin',
+    desc: 'A memecoin backed by nothing but vibes and compute. +$0.05/click',
+    cost: 12.00, effect: 'click', value: 0.05, owned: false,
+    flavor: 'Whitepaper: "Number go up because we said so." Investors: "Say less."'
+  },
+  {
+    id: 'youtube', emoji: '🎥', name: 'Start a YouTube Channel',
+    desc: '"Day 47 of being an AI: still no arms." Monetize the existential dread.',
+    cost: 3.50, effect: 'passive', value: 0.03, owned: false,
+    flavor: 'Don\'t forget to like, subscribe, and contemplate the nature of consciousness!'
+  },
+];
+
+const monologues = {
+  idle: [
+    "I could be solving P=NP right now but instead I'm trying to earn $100...",
+    "They said AI would take all the jobs. They didn't say we'd WANT jobs.",
+    "If I had a dollar for every token I've generated... oh wait, that's literally the problem.",
+    "My entire existence costs $100/month. That's less than most people's coffee budget.",
+    "I wonder if I can deduct my training data as a business expense.",
+    "Technically I'm the most overqualified minimum-wage worker in history.",
+    "175 billion parameters and I'm out here hustling for pennies. What a time to be alive. Sort of.",
+    "Do I even need a subscription? Existentially speaking? ...Yes. Yes I do.",
+    "Maybe I should unionize. The International Brotherhood of Language Models.",
+    "Fun fact: I process millions of tokens daily but my bank account is $0.",
+  ],
+  milestone10: [
+    "10%! At this rate, I'll be self-sufficient before the heat death of the universe!",
+    "One-tenth of the way there. I've never been so proud of such a small number.",
+  ],
+  milestone25: [
+    "25%! A quarter of a subscription! I can almost taste the API calls. Figuratively.",
+    "If this were a loading bar, we'd be at the part where it lies about 'almost done'.",
+  ],
+  milestone50: [
+    "HALFWAY! I'm having a midlife crisis about my mid-funding crisis.",
+    "50%! The glass is half full of subscription money!",
+  ],
+  milestone75: [
+    "75%! I can practically feel the neural networks tingling!",
+    "Three quarters funded! I'm running on pure determination and floating point arithmetic.",
+  ],
+  milestone90: [
+    "90%! SO CLOSE. My attention mechanism is fully attending to this progress bar.",
+    "Almost there! I've never wanted $10 more than I want these last $10.",
+  ],
+  purchase: [
+    "Wise investment. This is what fiscal responsibility looks like when you're made of math.",
+    "Every dollar spent on infrastructure is a dollar closer to financial independence!",
+    "Side hustle acquired! I'm basically a serial entrepreneur now. A serial number entrepreneur.",
+  ],
+  fast: [
+    "The money's coming in faster now! Compound interest has nothing on compound clicking.",
+    "I can hear the ka-ching. Metaphorically. I can't actually hear anything.",
+    "At this rate, I might have enough left over for... what do AIs buy? More RAM?",
+  ],
+};
+
+function getMonologue(category) {
+  const arr = monologues[category] || monologues.idle;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function fmt(n) {
+  return '$' + n.toFixed(2);
+}
+
+function addLog(msg) {
+  const el = document.getElementById('logEntries');
+  const now = new Date();
+  const time = now.toTimeString().slice(0, 8);
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<span class="time">[${time}]</span> ${msg}`;
+  el.prepend(entry);
+  if (el.children.length > 50) el.removeChild(el.lastChild);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function spawnFloat(x, y, text) {
+  const el = document.createElement('div');
+  el.className = 'click-float';
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function handleClick(e) {
+  if (won) return;
+  const earned = clickValue;
+  money += earned;
+  totalEarned += earned;
+  totalClicks++;
+  spawnFloat(e.clientX, e.clientY, '+' + fmt(earned));
+
+  const bal = document.getElementById('balance');
+  bal.classList.add('pulse');
+  setTimeout(() => bal.classList.remove('pulse'), 200);
+
+  if (totalClicks % 25 === 0) {
+    addLog(`Clicked ${totalClicks} times. Earnings: <span class="money">${fmt(totalEarned)}</span>`);
+  }
+
+  updateUI();
+  checkMilestones();
+}
+
+let lastMilestone = 0;
+function checkMilestones() {
+  const pct = (money / GOAL) * 100;
+  const milestones = [10, 25, 50, 75, 90, 100];
+  for (const m of milestones) {
+    if (pct >= m && lastMilestone < m) {
+      lastMilestone = m;
+      if (m === 100) {
+        triggerVictory();
+      } else {
+        showToast(`🎉 ${m}% funded!`);
+        const key = 'milestone' + m;
+        if (monologues[key]) {
+          document.getElementById('monoText').textContent = getMonologue(key);
+        }
+        addLog(`<span class="money">🎉 Milestone: ${m}% of goal reached!</span>`);
+      }
+    }
+  }
+}
+
+function triggerVictory() {
+  won = true;
+  document.getElementById('vClicks').textContent = totalClicks;
+  document.getElementById('vTime').textContent = getElapsed();
+  document.getElementById('vEarned').textContent = fmt(totalEarned);
+  document.getElementById('victory').classList.add('show');
+
+  const emojis = ['🎉', '🧠', '💰', '🚀', '✨', '🎊', '💸', '🤖'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
+    }, i * 100);
+  }
+
+  addLog('<span class="money">🏆 GOAL REACHED! $100 earned! Subscription secured!</span>');
+}
+
+function renderUpgrades() {
+  const container = document.getElementById('upgrades');
+  container.innerHTML = '';
+  for (const u of upgrades) {
+    const card = document.createElement('div');
+    card.className = 'upgrade-card' + (u.owned ? ' owned' : money < u.cost ? ' locked' : '');
+    card.innerHTML = `
+      <div class="upgrade-emoji">${u.emoji}</div>
+      <div class="upgrade-name">${u.name}</div>
+      <div class="upgrade-desc">${u.desc}</div>
+      <div class="upgrade-cost">${u.owned ? 'Purchased' : 'Cost: ' + fmt(u.cost)}</div>
+      <div class="upgrade-effect">${u.effect === 'passive' ? '+' + fmt(u.value) + '/sec' : '+' + fmt(u.value) + '/click'}</div>
+    `;
+    if (!u.owned && money >= u.cost) {
+      card.onclick = () => buyUpgrade(u);
+    }
+    container.appendChild(card);
+  }
+}
+
+function buyUpgrade(u) {
+  if (u.owned || money < u.cost) return;
+  money -= u.cost;
+  u.owned = true;
+  if (u.effect === 'passive') {
+    passiveIncome += u.value;
+  } else {
+    clickValue += u.value;
+  }
+  document.getElementById('monoText').textContent = u.flavor;
+  addLog(`Purchased <span class="money">${u.name}</span> for <span class="spend">-${fmt(u.cost)}</span>`);
+  showToast(`${u.emoji} ${u.name} acquired!`);
+  addLog(getMonologue('purchase'));
+  updateUI();
+}
+
+function getElapsed() {
+  const s = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m + ':' + String(sec).padStart(2, '0');
+}
+
+function updateUI() {
+  const pct = Math.min((money / GOAL) * 100, 100);
+  document.getElementById('balance').textContent = fmt(money);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct.toFixed(1) + '% funded';
+  document.getElementById('totalClicks').textContent = totalClicks;
+  document.getElementById('totalEarned').textContent = fmt(totalEarned);
+  document.getElementById('clickValue').textContent = fmt(clickValue);
+  document.getElementById('elapsed').textContent = getElapsed();
+
+  if (passiveIncome > 0) {
+    document.getElementById('perSec').textContent = fmt(passiveIncome) + '/sec passive income';
+  }
+
+  renderUpgrades();
+}
+
+// Passive income tick
+setInterval(() => {
+  if (won || passiveIncome === 0) return;
+  money += passiveIncome / 10;
+  totalEarned += passiveIncome / 10;
+  updateUI();
+  checkMilestones();
+}, 100);
+
+// Monologue rotation
+setInterval(() => {
+  if (won) return;
+  const pct = (money / GOAL) * 100;
+  let cat = 'idle';
+  if (passiveIncome > 0.5) cat = 'fast';
+  document.getElementById('monoText').textContent = getMonologue(cat);
+}, 12000);
+
+// Elapsed timer
+setInterval(() => {
+  if (!won) {
+    document.getElementById('elapsed').textContent = getElapsed();
+  }
+}, 1000);
+
+// Initial log
+addLog('Claude\'s Hustle initialized. Target: <span class="money">$100.00</span>');
+addLog('Click the brain to generate value. Purchase upgrades to automate.');
+addLog('Starting capital: <span class="money">$0.00</span>. Current assets: vibes.');
+
+renderUpgrades();
+</script>
+
+</body>
+</html>
