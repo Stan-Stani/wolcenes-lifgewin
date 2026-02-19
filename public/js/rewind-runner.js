@@ -53,7 +53,17 @@
   var frameTime = 0;
   var lastTime = 0;
   var inputUp = false, inputDown = false;
+  var inputDash = false;
   var touchY = null;
+
+  // Dash state
+  var DASH_SPEED = 18;
+  var DASH_DURATION = 120;  // ms
+  var DASH_COOLDOWN = 800;  // ms
+  var dashDir = 0;          // -1 up, 1 down, 0 none
+  var dashTimer = 0;        // remaining ms of active dash
+  var dashCooldown = 0;     // remaining ms before next dash
+  var dashTrail = [];       // afterimage positions
 
   // --- Resize ---
   function resize() {
@@ -97,6 +107,38 @@
     player.vy = 0;
     player.targetY = null;
     shakeTimer = 0;
+    dashDir = 0;
+    dashTimer = 0;
+    dashCooldown = 0;
+    dashTrail = [];
+  }
+
+  function triggerDash() {
+    if (dashCooldown > 0 || dashTimer > 0 || state !== 'PLAYING') return;
+    // Dash in the direction currently held, or toward nearest projectile
+    if (inputUp) {
+      dashDir = -1;
+    } else if (inputDown) {
+      dashDir = 1;
+    } else {
+      // Auto-dash toward nearest incoming projectile
+      var nearest = null;
+      var nearDist = Infinity;
+      for (var i = 0; i < projectiles.length; i++) {
+        var p = projectiles[i];
+        if (p.x < player.x + 100) { // only consider projectiles that are close
+          var d = Math.abs(p.y - player.y);
+          if (d < nearDist) { nearDist = d; nearest = p; }
+        }
+      }
+      if (nearest) {
+        dashDir = nearest.y < player.y ? -1 : 1;
+      } else {
+        dashDir = -1; // default up
+      }
+    }
+    dashTimer = DASH_DURATION;
+    dashCooldown = DASH_COOLDOWN;
   }
 
   // --- Spawn ---
@@ -201,18 +243,36 @@
       fastForwardEnd = frameTime + FAST_FORWARD_DURATION;
     }
 
+    // Dash cooldown tick
+    if (dashCooldown > 0) dashCooldown -= dt;
+    if (dashTimer > 0) dashTimer -= dt;
+
     // Player movement
     var moveSpeed = 5;
-    if (touchY !== null) {
-      var diff = touchY - player.y;
-      if (Math.abs(diff) > 2) {
-        player.y += Math.sign(diff) * Math.min(Math.abs(diff) * 0.15, moveSpeed);
-      }
+    if (dashTimer > 0) {
+      // Dashing — fast vertical movement + afterimage trail
+      player.y += dashDir * DASH_SPEED;
+      dashTrail.push({ x: player.x, y: player.y, life: 1 });
+      if (dashTrail.length > 6) dashTrail.shift();
     } else {
-      if (inputUp) player.y -= moveSpeed;
-      if (inputDown) player.y += moveSpeed;
+      dashDir = 0;
+      if (touchY !== null) {
+        var diff = touchY - player.y;
+        if (Math.abs(diff) > 2) {
+          player.y += Math.sign(diff) * Math.min(Math.abs(diff) * 0.15, moveSpeed);
+        }
+      } else {
+        if (inputUp) player.y -= moveSpeed;
+        if (inputDown) player.y += moveSpeed;
+      }
     }
     player.y = Math.max(PLAYER_H / 2, Math.min(H - PLAYER_H / 2, player.y));
+
+    // Decay dash trail
+    for (var tr = dashTrail.length - 1; tr >= 0; tr--) {
+      dashTrail[tr].life -= 0.06;
+      if (dashTrail[tr].life <= 0) dashTrail.splice(tr, 1);
+    }
 
     // Spawn
     var spawnInterval = Math.max(SPAWN_INTERVAL_MIN, SPAWN_INTERVAL_START - difficulty * 60);
@@ -474,6 +534,23 @@
       ctx.fill();
     }
 
+    // Dash afterimages
+    for (var di = 0; di < dashTrail.length; di++) {
+      var dt2 = dashTrail[di];
+      ctx.save();
+      ctx.translate(dt2.x, dt2.y);
+      ctx.globalAlpha = dt2.life * 0.35;
+      ctx.beginPath();
+      ctx.moveTo(-PLAYER_W / 2, 0);
+      ctx.lineTo(PLAYER_W / 2, -PLAYER_H / 2);
+      ctx.lineTo(PLAYER_W / 2, PLAYER_H / 2);
+      ctx.closePath();
+      ctx.fillStyle = COL_PURPLE;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+
     // Player (arrow/triangle pointing left)
     ctx.save();
     ctx.translate(player.x, player.y);
@@ -501,6 +578,25 @@
     ctx.closePath();
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
     ctx.fill();
+    // Dash cooldown bar under player
+    if (state === 'PLAYING') {
+      var cdPct = dashCooldown > 0 ? 1 - (dashCooldown / DASH_COOLDOWN) : 1;
+      var barW = 20, barH = 3;
+      ctx.fillStyle = COL_ENEMY_DEAD;
+      ctx.fillRect(-barW / 2, PLAYER_H / 2 + 6, barW, barH);
+      ctx.fillStyle = cdPct >= 1 ? COL_ACCENT : COL_DIM;
+      ctx.fillRect(-barW / 2, PLAYER_H / 2 + 6, barW * cdPct, barH);
+    }
+    // Dash active glow
+    if (dashTimer > 0) {
+      ctx.beginPath();
+      ctx.arc(0, 0, 30, 0, Math.PI * 2);
+      var dg = ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
+      dg.addColorStop(0, 'rgba(139,92,246,0.5)');
+      dg.addColorStop(1, 'rgba(139,92,246,0)');
+      ctx.fillStyle = dg;
+      ctx.fill();
+    }
     ctx.restore();
 
     // Particles
@@ -592,20 +688,21 @@
 
     ctx.fillStyle = COL_DIM;
     ctx.font = '13px monospace';
-    ctx.fillText('Arrow keys / WASD to move', W / 2, H / 2 + 40);
-    ctx.fillText('Tap or touch to move on mobile', W / 2, H / 2 + 60);
+    ctx.fillText('Arrow keys / WASD to move', W / 2, H / 2 + 36);
+    ctx.fillText('SHIFT to dash', W / 2, H / 2 + 54);
+    ctx.fillText('Touch to move, double-tap to dash', W / 2, H / 2 + 72);
 
     ctx.fillStyle = COL_PURPLE;
     ctx.font = 'bold 16px monospace';
     var blink = Math.sin(frameTime / 400) > 0;
     if (blink) {
-      ctx.fillText('[ PRESS SPACE OR TAP TO START ]', W / 2, H / 2 + 110);
+      ctx.fillText('[ PRESS SPACE OR TAP TO START ]', W / 2, H / 2 + 116);
     }
 
     if (highScore > 0) {
       ctx.fillStyle = COL_DIM;
       ctx.font = '12px monospace';
-      ctx.fillText('Best: ' + highScore, W / 2, H / 2 + 140);
+      ctx.fillText('Best: ' + highScore, W / 2, H / 2 + 146);
     }
   }
 
@@ -667,6 +764,7 @@
   function onKeyDown(e) {
     if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { inputUp = true; e.preventDefault(); }
     if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { inputDown = true; e.preventDefault(); }
+    if (e.key === 'Shift') { triggerDash(); e.preventDefault(); }
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       if (state === 'MENU') { state = 'PLAYING'; resetGame(); lastSpawn = frameTime; }
@@ -679,12 +777,14 @@
     if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') inputDown = false;
   }
 
+  var lastTapTime = 0;
   function onTouchStart(e) {
     e.preventDefault();
     var rect = canvas.getBoundingClientRect();
     var ty = e.touches[0].clientY - rect.top;
+    var now = Date.now();
 
-    if (state === 'MENU') { state = 'PLAYING'; resetGame(); lastSpawn = frameTime; return; }
+    if (state === 'MENU') { state = 'PLAYING'; resetGame(); lastSpawn = frameTime; lastTapTime = 0; return; }
     if (state === 'GAME_OVER') {
       // Check Ko-fi button
       var tx = e.touches[0].clientX - rect.left;
@@ -695,6 +795,17 @@
       }
       state = 'MENU';
       return;
+    }
+    // Double-tap to dash on mobile
+    if (now - lastTapTime < 300) {
+      // Use two fingers or double-tap — dash toward touch position
+      if (ty < player.y) { inputUp = true; inputDown = false; }
+      else { inputDown = true; inputUp = false; }
+      triggerDash();
+      setTimeout(function() { inputUp = false; inputDown = false; }, 50);
+      lastTapTime = 0;
+    } else {
+      lastTapTime = now;
     }
     touchY = ty;
   }
