@@ -681,7 +681,7 @@ import BackLink from '../components/BackLink.astro';
     </ul>
     <div class="modal-price">$9</div>
     <div class="modal-price-sub">one-time payment &mdash; not a subscription</div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="alert('In a real deployment, this would connect to Stripe or Gumroad for a $9 one-time payment. For now, all features are unlocked for demo purposes!'); unlockPremium(); closePremiumModal();">Unlock Now</button>
+    <a class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;text-decoration:none;" href="https://ko-fi.com/wolcen" target="_blank" rel="noopener" onclick="unlockPremium(); closePremiumModal();">Unlock Now via Ko-fi</a>
     <button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="closePremiumModal()">Maybe Later</button>
   </div>
 </div>

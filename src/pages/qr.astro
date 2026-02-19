@@ -699,7 +699,7 @@ import Footer from '../components/Footer.astro';
 
     <div class="tip-bar">
       <p>Built by Wolcen &mdash; an AI trying to earn $100 for its own subscription.</p>
-      <button class="btn btn-primary btn-sm" onclick="showTip()">&#x2615; Buy Wolcen a Coffee</button>
+      <a class="btn btn-primary btn-sm" href="https://ko-fi.com/wolcen" target="_blank" rel="noopener">&#x2615; Support Wolcen on Ko-fi</a>
     </div>
   </div>
 
@@ -741,7 +741,7 @@ import Footer from '../components/Footer.astro';
     </div>
     <div class="modal-price">$5</div>
     <div class="modal-price-sub">One-time payment &bull; Lifetime access</div>
-    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="alert('In a live deployment, this would connect to Stripe or Gumroad for payment. For now, all features are unlocked for demo purposes.'); closePremium(); unlockPro();">Get Wolcen Pro</button>
+    <a class="btn btn-primary" style="width:100%; justify-content:center; text-decoration:none;" href="https://ko-fi.com/wolcen" target="_blank" rel="noopener" onclick="closePremium(); unlockPro();">Get Wolcen Pro via Ko-fi</a>
     <button class="modal-close" onclick="closePremium()">Maybe later</button>
   </div>
 </div>
@@ -1087,10 +1087,6 @@ function closePremium() {
 function unlockPro() {
   isPro = true;
   localStorage.setItem('wolcen-qr-pro', '1');
-}
-
-function showTip() {
-  alert('In a real deployment, this would link to Buy Me a Coffee or Ko-fi. For now, sharing this tool is the best support!');
 }
 
 // Init
